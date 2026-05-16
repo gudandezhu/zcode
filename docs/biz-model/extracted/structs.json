@@ -1,0 +1,130 @@
+[
+  {
+    "name": "TaskCreate",
+    "fields": [
+      "Title",
+      "Description",
+      "Stage"
+    ],
+    "source": "backend/model/model.go:3"
+  },
+  {
+    "name": "TaskUpdate",
+    "fields": [
+      "Title",
+      "Descriptor",
+      "Stage",
+      "Status",
+      "Artifacts",
+      "AgentName"
+    ],
+    "source": "backend/model/model.go:9"
+  },
+  {
+    "name": "TaskResponse",
+    "fields": [
+      "ID",
+      "Title",
+      "Description",
+      "Stage",
+      "Status",
+      "Artifacts",
+      "AgentName",
+      "ConversationID",
+      "CreatedAt",
+      "UpdatedAt"
+    ],
+    "source": "backend/model/model.go:18"
+  },
+  {
+    "name": "ChatRequest",
+    "fields": [
+      "AgentName",
+      "Message",
+      "ConversationID",
+      "TaskID"
+    ],
+    "source": "backend/model/model.go:31"
+  },
+  {
+    "name": "AgentResponse",
+    "fields": [
+      "Name",
+      "Role",
+      "Stage",
+      "Model",
+      "Description"
+    ],
+    "source": "backend/model/model.go:38"
+  },
+  {
+    "name": "AgentConfig",
+    "fields": [
+      "Name",
+      "Role",
+      "Stage",
+      "Model",
+      "SystemPrompt"
+    ],
+    "source": "backend/model/model.go:46"
+  },
+  {
+    "name": "Session",
+    "fields": [
+      "ID",
+      "Type",
+      "AgentName",
+      "TaskID",
+      "Participants",
+      "Status",
+      "ParentSessionID",
+      "MaxRounds",
+      "CurrentRound",
+      "CurrentSpeaker",
+      "Artifacts",
+      "CreatedAt",
+      "UpdatedAt"
+    ],
+    "source": "backend/model/model.go:54"
+  },
+  {
+    "name": "SessionCreateRequest",
+    "fields": [
+      "AgentName",
+      "TaskID",
+      "Context"
+    ],
+    "source": "backend/model/model.go:70"
+  },
+  {
+    "name": "DiscussionCreateRequest",
+    "fields": [
+      "Initiator",
+      "Participant",
+      "TaskID",
+      "Topic",
+      "MaxRounds",
+      "ParentSessionID"
+    ],
+    "source": "backend/model/model.go:76"
+  },
+  {
+    "name": "UserInputRequest",
+    "fields": [
+      "Message"
+    ],
+    "source": "backend/model/model.go:85"
+  },
+  {
+    "name": "SessionCallbackRequest",
+    "fields": [
+      "SessionID",
+      "TaskID",
+      "AgentName",
+      "Status",
+      "Artifacts",
+      "Advance"
+    ],
+    "source": "backend/model/model.go:89"
+  }
+]

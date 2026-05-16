@@ -1,0 +1,5 @@
+name: tester
+role: 测试工程师
+stage: testing
+model: claude-sonnet-4-20250514
+max_rounds: 50

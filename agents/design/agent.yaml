@@ -1,0 +1,5 @@
+name: design
+role: 高级架构师
+stage: design
+model: claude-sonnet-4-20250514
+max_rounds: 50

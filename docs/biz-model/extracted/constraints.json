@@ -1,0 +1,163 @@
+[
+  {
+    "table": "tasks",
+    "column": "id",
+    "constraint_type": "PRIMARY_KEY",
+    "value": null,
+    "source": "backend/db/db.go:34"
+  },
+  {
+    "table": "tasks",
+    "column": "title",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "",
+    "source": "backend/db/db.go:34"
+  },
+  {
+    "table": "tasks",
+    "column": "description",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "",
+    "source": "backend/db/db.go:34"
+  },
+  {
+    "table": "tasks",
+    "column": "stage",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "requirement",
+    "source": "backend/db/db.go:34"
+  },
+  {
+    "table": "tasks",
+    "column": "status",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "pending",
+    "source": "backend/db/db.go:34"
+  },
+  {
+    "table": "tasks",
+    "column": "artifacts",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "[]",
+    "source": "backend/db/db.go:34"
+  },
+  {
+    "table": "tasks",
+    "column": "agent_name",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "",
+    "source": "backend/db/db.go:34"
+  },
+  {
+    "table": "tasks",
+    "column": "conversation_id",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "",
+    "source": "backend/db/db.go:34"
+  },
+  {
+    "table": "conversations",
+    "column": "id",
+    "constraint_type": "PRIMARY_KEY",
+    "value": null,
+    "source": "backend/db/db.go:46"
+  },
+  {
+    "table": "conversations",
+    "column": "task_id",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "",
+    "source": "backend/db/db.go:46"
+  },
+  {
+    "table": "messages",
+    "column": "id",
+    "constraint_type": "AUTO_INCREMENT",
+    "value": null,
+    "source": "backend/db/db.go:52"
+  },
+  {
+    "table": "messages",
+    "column": "conversation_id",
+    "constraint_type": "FOREIGN_KEY",
+    "value": "conversations.id",
+    "source": "backend/db/db.go:52"
+  },
+  {
+    "table": "sessions",
+    "column": "id",
+    "constraint_type": "PRIMARY_KEY",
+    "value": null,
+    "source": "backend/db/db.go:60"
+  },
+  {
+    "table": "sessions",
+    "column": "type",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "main",
+    "source": "backend/db/db.go:60"
+  },
+  {
+    "table": "sessions",
+    "column": "agent_name",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "",
+    "source": "backend/db/db.go:60"
+  },
+  {
+    "table": "sessions",
+    "column": "task_id",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "",
+    "source": "backend/db/db.go:60"
+  },
+  {
+    "table": "sessions",
+    "column": "participants",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "[]",
+    "source": "backend/db/db.go:60"
+  },
+  {
+    "table": "sessions",
+    "column": "status",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "running",
+    "source": "backend/db/db.go:60"
+  },
+  {
+    "table": "sessions",
+    "column": "parent_session_id",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "",
+    "source": "backend/db/db.go:60"
+  },
+  {
+    "table": "sessions",
+    "column": "current_speaker",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "",
+    "source": "backend/db/db.go:60"
+  },
+  {
+    "table": "sessions",
+    "column": "artifacts",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "[]",
+    "source": "backend/db/db.go:60"
+  },
+  {
+    "table": "sessions",
+    "column": "max_rounds",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "50",
+    "source": "backend/db/db.go:60"
+  },
+  {
+    "table": "sessions",
+    "column": "current_round",
+    "constraint_type": "NOT_NULL_DEFAULT",
+    "value": "0",
+    "source": "backend/db/db.go:60"
+  }
+]

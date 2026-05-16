@@ -1,0 +1,116 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/health",
+    "handler": "func(c *gin.Context",
+    "source": "backend/main.go:22"
+  },
+  {
+    "method": "POST",
+    "path": "/api/tasks",
+    "handler": "handler.CreateTask",
+    "source": "backend/main.go:30"
+  },
+  {
+    "method": "GET",
+    "path": "/api/tasks",
+    "handler": "handler.ListTasks",
+    "source": "backend/main.go:31"
+  },
+  {
+    "method": "GET",
+    "path": "/api/tasks/:id",
+    "handler": "handler.GetTask",
+    "source": "backend/main.go:32"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/tasks/:id",
+    "handler": "handler.UpdateTask",
+    "source": "backend/main.go:33"
+  },
+  {
+    "method": "POST",
+    "path": "/api/tasks/:id/advance",
+    "handler": "handler.AdvanceTask",
+    "source": "backend/main.go:34"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/tasks/:id",
+    "handler": "handler.DeleteTask",
+    "source": "backend/main.go:35"
+  },
+  {
+    "method": "POST",
+    "path": "/api/chat",
+    "handler": "handler.Chat",
+    "source": "backend/main.go:38"
+  },
+  {
+    "method": "GET",
+    "path": "/api/chat/history/:conversationId",
+    "handler": "handler.GetHistory",
+    "source": "backend/main.go:39"
+  },
+  {
+    "method": "GET",
+    "path": "/api/agents",
+    "handler": "handler.ListAgents",
+    "source": "backend/main.go:43"
+  },
+  {
+    "method": "GET",
+    "path": "/api/agents/reload",
+    "handler": "handler.ReloadAgents",
+    "source": "backend/main.go:44"
+  },
+  {
+    "method": "GET",
+    "path": "/api/agents/stages",
+    "handler": "handler.ListStages",
+    "source": "backend/main.go:45"
+  },
+  {
+    "method": "POST",
+    "path": "/api/sessions",
+    "handler": "handler.CreateSession",
+    "source": "backend/main.go:50"
+  },
+  {
+    "method": "GET",
+    "path": "/api/sessions",
+    "handler": "handler.ListSessions",
+    "source": "backend/main.go:51"
+  },
+  {
+    "method": "GET",
+    "path": "/api/sessions/:id",
+    "handler": "handler.GetSession",
+    "source": "backend/main.go:52"
+  },
+  {
+    "method": "GET",
+    "path": "/api/sessions/:id/stream",
+    "handler": "handler.StreamSession",
+    "source": "backend/main.go:53"
+  },
+  {
+    "method": "POST",
+    "path": "/api/sessions/:id/input",
+    "handler": "handler.SendUserInput",
+    "source": "backend/main.go:54"
+  },
+  {
+    "method": "POST",
+    "path": "/api/sessions/discuss",
+    "handler": "handler.CreateDiscussion",
+    "source": "backend/main.go:55"
+  },
+  {
+    "method": "POST",
+    "path": "/api/sessions/callback",
+    "handler": "handler.SessionCallback",
+    "source": "backend/main.go:56"
+  }
+]

@@ -1,0 +1,5 @@
+name: requirement
+role: 需求分析师
+stage: requirement
+model: claude-sonnet-4-20250514
+max_rounds: 50

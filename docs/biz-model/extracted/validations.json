@@ -1,0 +1,62 @@
+[
+  {
+    "struct": "TaskCreate",
+    "field": "Title",
+    "rule": "required",
+    "source": "backend/model/model.go:4"
+  },
+  {
+    "struct": "ChatRequest",
+    "field": "AgentName",
+    "rule": "required",
+    "source": "backend/model/model.go:32"
+  },
+  {
+    "struct": "ChatRequest",
+    "field": "Message",
+    "rule": "required",
+    "source": "backend/model/model.go:33"
+  },
+  {
+    "struct": "",
+    "field": "",
+    "rule": "must_bind_json",
+    "source": "backend/handler/chat_handler.go:16"
+  },
+  {
+    "struct": "",
+    "field": "",
+    "rule": "must_bind_json",
+    "source": "backend/handler/task_handler.go:14"
+  },
+  {
+    "struct": "",
+    "field": "",
+    "rule": "must_bind_json",
+    "source": "backend/handler/task_handler.go:50"
+  },
+  {
+    "struct": "",
+    "field": "",
+    "rule": "must_bind_json",
+    "source": "backend/handler/session_handler.go:16"
+  },
+  {
+    "struct": "",
+    "field": "",
+    "rule": "must_bind_json",
+    "source": "backend/handler/session_handler.go:42"
+  },
+  {
+    "struct": "",
+    "field": "",
+    "rule": "must_bind_json",
+    "source": "backend/handler/session_handler.go:74"
+  },
+  {
+    "struct": "",
+    "field": "",
+    "rule": "must_bind_json",
+    "source": "backend/handler/session_handler.go:88"
+  }
+]

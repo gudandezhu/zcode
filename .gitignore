@@ -1,0 +1,11 @@
+.pids/
+*.log
+
+*.db
+*.db-shm
+*.db-wal
+
+.env
+
+frontend/node_modules
+frontend/.next
