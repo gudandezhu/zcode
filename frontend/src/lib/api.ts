@@ -6,7 +6,7 @@ export interface Task {
   description: string;
   stage: string;
   status: string;
-  artifacts: string[];
+  artifacts: Record<string, unknown>[];
   agent_name: string;
   conversation_id: string;
   created_at: string;
@@ -33,6 +33,32 @@ export interface StageInfo {
   key: string;
   label: string;
   agent: string;
+}
+
+export interface Session {
+  id: string;
+  type: string;
+  agent_name: string;
+  task_id: string;
+  participants: string[];
+  status: string;
+  parent_session_id: string;
+  max_rounds: number;
+  current_round: number;
+  current_speaker: string;
+  artifacts: Record<string, unknown>[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SSEEvent {
+  type: string;
+  content?: string;
+  agent?: string;
+  name?: string;
+  arguments?: string;
+  question?: string;
+  status?: string;
 }
 
 export async function fetchTasks(stage?: string): Promise<Task[]> {
@@ -146,4 +172,47 @@ export async function streamChat(
 export async function fetchHistory(conversationId: string): Promise<ChatMessage[]> {
   const res = await fetch(`${API}/api/chat/history/${conversationId}`);
   return res.json();
+}
+
+export async function fetchSessions(taskId: string): Promise<Session[]> {
+  const res = await fetch(`${API}/api/sessions?task_id=${taskId}`);
+  const data = await res.json();
+  return data.sessions || [];
+}
+
+export function streamSession(
+  sessionId: string,
+  onEvent: (event: SSEEvent) => void,
+  onDone: () => void,
+): AbortController {
+  const ctrl = new AbortController();
+  fetch(`${API}/api/sessions/${sessionId}/stream`, { signal: ctrl.signal })
+    .then(async (res) => {
+      const reader = res.body?.getReader();
+      if (!reader) return;
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const data = line.slice(6);
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.type === "done") {
+              onDone();
+              return;
+            }
+            onEvent(parsed);
+          } catch {}
+        }
+      }
+      onDone();
+    })
+    .catch(() => onDone());
+  return ctrl;
 }
