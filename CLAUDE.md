@@ -12,3 +12,6 @@ Today's date is 2026/05/16.
 - [功能说明](docs/features.md) — 看板、聊天、Session 自主执行、Discussion 多 Agent 讨论
 - [部署指南](docs/deployment.md) — 环境要求、环境变量（Go+Python+前端）、启动脚本、数据库
 - [Agent 配置](docs/agent-config.md) — agent.yaml 格式、system_prompt.md、skills 目录、内置工具
+
+# 交接文档（必读）
+- [任务看板](plan.md) — **AI 启动必读** — 当前待办/进行中/已完成的任务状态
