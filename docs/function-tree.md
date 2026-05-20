@@ -1,0 +1,130 @@
+# 需求功能树
+
+> Zcode — 个人开发者 AI 编码助手。单用户、本地优先。
+
+---
+
+- KB 看板页 /kanban
+  - KB-DISP 列表展示
+    - KB-DISP-COL 列渲染：系统按 pipeline.yaml 阶段配置渲染列，每列显示阶段名和任务数 badge
+    - KB-DISP-CARD 卡片渲染���任务卡片显示标题、状态标记、最新动作摘要、Session 进度条（running 时脉冲动画）
+    - KB-DISP-SUB 子任务展示：子任务卡片缩进显示，父任务卡片显示子任务完成进度 "N/M 已完成"
+    - KB-DISP-STAT 状态标记：pending 灰色边框、in_progress 蓝色实心、completed 绿色实心、failed 红色实心
+  - KB-FLTR 筛选
+    - KB-FLTR-STAG 按阶段筛选：用户点击列头或筛选器选择阶段，列表仅显示该阶段任务
+  - KB-CRUD 任务操作
+    - KB-CRUD-CRT 新建任务：用户点击「新建任务」，填写标题/描述/选择阶段/选择项目，提交后卡片出现在对应列
+    - KB-CRUD-DEL 删除任务：用户删除任务，二次确认后从看板移除
+    - KB-CRUD-ADV 推进阶段：用户点击「推进下一阶段」，任务卡片移到下一列，状态更新
+  - KB-AUTO 自动行为
+    - KB-AUTO-REF 自动刷新：系统每 5 秒轮询后端，更新卡片状态和位置
+  - KB-FLOW 入口
+    - F-KBCRT 创建任务并跳转聊天
+      - {##KB-CRUD-CRT}：创建任务
+      - {##KB-DISP-DRW}：点击卡片标题打开抽屉
+      - {##DRW-SES-STA}：在抽屉中启动 Session
+
+- CHAT 聊天页 /chat
+  - CHAT-SEL Agent 选择
+    - CHAT-SEL-PIPE 流水线 Agent：用户点击流水线 Agent 按钮（需求分析师/架构师/开发/测试），选中该 Agent 并清空历史
+    - CHAT-SEL-CUST 自定义 Agent：用户点击自定义 Agent 按钮，选中该 Agent 并清空历史
+    - CHAT-SEL-URL URL 参数预选：从看板跳转 `/chat?agent=xxx&task=xxx`，自动选中 Agent 并关联 Task
+  - CHAT-MSG 消息交互
+    - CHAT-MSG-SND 发送消息：用户输入消息点击发送或按 Enter，消息追加到列表，Agent 流式回复逐字渲染
+    - CHAT-MSG-HIST 历史加载：选中 Agent 后加载该 Agent 的对话历史，用户消息右对齐深色，Agent 消息左对齐浅色
+  - CHAT-STRM 流式显示
+    - CHAT-STRM-SSE SSE 流式渲染：Agent 回复通过 SSE 逐片段推送，前端逐字显示带打字动画
+    - CHAT-STRM-ERR 流式错误处理：SSE 返回 error 事件时，显示错误提示，不中断已渲染内容
+  - CHAT-FLOW 入口
+    - F-CHATKB 看板跳转聊天
+      - {##CHAT-SEL-URL}：URL 参数自动选中 Agent
+      - {##CHAT-MSG-SND}：发送第一条消息
+      - {##CHAT-STRM-SSE}：接收 Agent 流式回复
+
+- DRW 任务详情抽屉 (侧边 S区)
+  - DRW-DISP 信息展示
+    - DRW-DISP-HEAD 头部信息：显示任务标题、阶段 badge、状态 badge
+    - DRW-DISP-PIPE 流水线进度条：横向 5 段进度条，当前阶段高亮、已完成标绿、未来灰显
+    - DRW-DISP-ART 产出物列表：展示 Session 产出的文档/代码等 artifact 列表
+    - DRW-DISP-ARTVIEW 产出物详情：用户点击产出物，弹窗 Markdown 渲染展示完整内容
+    - DRW-DISP-ARTDL 下载产出物：用户点击下载，产出物文件保存到本地
+  - DRW-TL 时间线
+    - DRW-TL-HIST 历史加载：加载任务所有 Session 事件，按时间纵向排列
+    - DRW-TL-EVT 事件卡片：每条事件显示时间、Agent 名、动作类型（text/tool_call/tool_result），可折叠展开详情
+    - DRW-TL-LIVE 实时 SSE：活跃 Session 的 SSE 事件实时追加到时间线末尾
+  - DRW-DISC Discussion 渲染
+    - DRW-DISC-BUBL 讨论气泡：Discussion Session 的 SSE 事件以左右对话气泡渲染，initiator 靠左灰色，participant 靠右主色
+    - DRW-DISC-ROUND 轮次分隔：每轮讨论显示轮次编号分隔线
+    - DRW-DISC-SUMM 讨论结论：讨论完成后显示结论摘要
+  - DRW-CLAR 用户回复
+    - DRW-CLAR-SUB 回复 Agent 提问：Session 状态为 waiting_input 时显示提问内容和输入框，用户输入回复后 Session 继续执行
+  - DRW-GATE 阶段门控
+    - DRW-GATE-APPR 审批通过：任务 waiting_review 状态时，用户点击「通过」，任务推进到下一阶段
+    - DRW-GATE-REJT 驳回并反馈：用户点击「驳回」，填写反馈意见提交，Agent 基于反馈修订产出
+    - DRW-GATE-EDIT 编辑 Artifact：用户点击编辑产出物，Markdown 编辑器修改内容，保存后成为正式 artifact
+  - DRW-CHK 自动检查
+    - DRW-CHK-DISP 检查状态展示：任务 checking 状态时，显示检查项列表及各项状态（通过/失败/执行中）
+    - DRW-CHK-LOG 命令输出日志：展示检查命令的输出日志，可折叠查看
+  - DRW-SES Session 操作
+    - DRW-SES-STA 启动 Session：任务 pending 状态时，用户点击启动 Agent 自主执行 Session
+    - DRW-SES-DISC 发起讨论：用户选择发起者和参与者 Agent，填写讨论主题和轮次，创建 Discussion Session
+    - DRW-SES-ADV 抽屉内推进：任务 completed 状态时，用户点击推进到下一阶段
+    - DRW-SES-RETRY 重试失败任务：任务 failed 状态时，用户点击重试，任务重新执行
+  - DRW-FLOW 入口
+    - F-GATEREV 人工审批门控
+      - {##DRW-DISP-ART}：查看 Agent 产出物
+      - {##DRW-GATE-EDIT}：编辑 Artifact（可选）
+      - {##DRW-GATE-APPR}：审批通过
+    - F-GATEREJ 审批驳回修订
+      - {##DRW-DISP-ART}：查看 Agent 产出物
+      - {##DRW-GATE-REJT}：驳回并填写反馈
+      - {##DRW-SES-RETRY}：Agent 修订后自动重试
+    - F-DISCUSS 多 Agent 讨论
+      - {##DRW-SES-DISC}：发起讨论
+      - {##DRW-DISC-BUBL}：实时查看讨论气泡
+      - {##DRW-DISC-SUMM}：查看讨论结论
+
+- NT 通知下拉 (右上角 T区)
+  - NT-DISP 通知展示
+    - NT-DISP-LIST 通知列表：点击铃铛图标展开通知下拉，显示通知项列表（类型图标 + 摘要 + 时间 + 未读蓝点）
+    - NT-DISP-EVT 通知事件类型：waiting_review "等待审批"、checking_failed "检查失败"、pipeline_completed "流水线完成"、agent_failed "Agent 失败"
+  - NT-ACT 通知操作
+    - NT-ACT-CLK 点击通知：点击通知项跳转到看板并打开对应任务抽屉
+    - NT-ACT-READ 全部已读：用户点击「全部已读」，清除所有未读蓝点
+
+- PRJ 项目设置弹窗 (E区)
+  - PRJ-GEN 基本信息
+    - PRJ-GEN-VIEW 项目信息展示：显示项目名称、路径、Git URL（可编辑）、技术栈（自动检测 badge）
+    - PRJ-GEN-CVT 编辑约定：用户填写编码规范/团队约定，保存到项目配置
+    - PRJ-GEN-SAVE 保存基本信息：用户点击保存，项目信息更新到后端
+  - PRJ-MEM Agent 记忆
+    - PRJ-MEM-LIST 记忆列表：展示项目级 fact 列表，每条显示内容、分类 badge（convention/pattern/decision/context）、置信度
+    - PRJ-MEM-ADD 添加记忆：用户输入内容和选择分类，添加一条 fact
+    - PRJ-MEM-EDIT 编辑记忆：用户 inline 编辑已有 fact 的内容或分类
+    - PRJ-MEM-DEL 删除记忆：用户删除一条 fact，二次确认后移除
+  - PRJ-PIPE 流水线配置
+    - PRJ-PIPE-VIEW 配置预览：以语法高亮只读展示 pipeline.yaml 内容
+    - PRJ-PIPE-STAG 阶段列表：从 pipeline.yaml 解析展示阶段列表（阶段 key → Agent → 门控类型 → 下一阶段）
+
+- GLB 全局
+  - GLB-NAV 导航
+    - GLB-NAV-TAB Tab 切换：用户点击 Navbar 的「看板」或「聊天」Tab，切换主内容区
+    - GLB-NAV-OPEN 打开抽屉/弹窗：全局键盘快捷键或点击触发抽屉/弹窗
+  - GLB-ERR 异常处理
+    - GLB-ERR-NET 网络断开：全局 toast 提示 "网络断开"，自动重连后 toast "已恢复"
+    - GLB-ERR-SSE SSE 断线重连：消息区域显示 "连接已断开" + 重新连接按钮，连续 3 次失败提示刷新页面
+  - GLB-CFM 确认弹窗
+    - GLB-CFM-SHOW 二次确认：删除等不可逆操作弹出确认弹窗，显示操作文案，用户确认后执行
+  - GLB-FLOW 入口
+    - F-PIPELINE 流水线全链路
+      - {##KB-CRUD-CRT}：创建任务
+      - {##DRW-SES-STA}：启动 Session
+      - {##DRW-TL-LIVE}：实时查看执行
+      - {##DRW-GATE-APPR}：审批通过（需求/设计阶段）
+      - {##DRW-SES-ADV}：推进到下一阶段
+      - 循环直到 done 阶段
+    - F-AUTORUN 自动推进流水线
+      - {##KB-CRUD-CRT}：创建任务（自动触发 Session）
+      - {##DRW-TL-LIVE}：Agent 自主执行
+      - {##DRW-SES-ADV}：auto_advance 自动推进
+      - {##NT-ACT-CLK}：收到完成通知

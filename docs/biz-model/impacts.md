@@ -31,7 +31,7 @@ flowchart TD
 - Task：新记录插入，stage=requirement, status=pending
 
 **副作用**
-- 自动触发 Agent 创建主会话，开始处理需求阶段（`service/task_service.go:53 triggerAgentForStage`）
+- 自动触发 Agent 创建主会话，开始处理需求阶段（task-service: triggerAgentForStage）
 
 ## advanceTask — 推进任务到下一阶段
 
@@ -39,8 +39,8 @@ flowchart TD
 - Task：stage 前进一步（requirement→design→development→testing→done）
 
 **副作用**
-- 自动触发下一阶段的 Agent 创建会话，并收集前序会话的 artifacts 作为上下文传递（`service/task_service.go:142-153`）
-- 将所有主会话的 artifacts 串联后传给下一阶段 Agent（`service/task_service.go:144-150`）
+- 自动触发下一阶段的 Agent 创建会话，并收集前序会话的 artifacts 作为上下文传递（task-service）
+- 将所有主会话的 artifacts 串联后传给下一阶段 Agent（task-service）
 
 ## chat — 用户与 Agent 对话
 
@@ -50,7 +50,7 @@ flowchart TD
 - Task：如果是首次对话，更新任务的 conversation_id 和 agent_name
 
 **副作用**
-- 消息同步保存到 Agent 的对话记忆中（`service/chat_service.go:57 agent.SaveToMemory`）
+- 消息同步保存到 Agent 的对话记忆中（chat-service）
 
 ## createSession — 创建 Agent 执行会话
 
@@ -68,7 +68,7 @@ flowchart TD
 - Session：插入或更新会话记录（status、artifacts 等字段）
 
 **副作用**
-- 若 advance=true 且 taskID 非空，自动触发 advanceTask 推进任务到下一阶段（`handler/session_handler.go:34-36`）
+- 若 advance=true 且 taskID 非空，自动触发 advanceTask 推进任务到下一阶段（session-handler）
 
 ## updateTask — 用户手动更新任务字段
 

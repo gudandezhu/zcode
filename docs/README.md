@@ -1,89 +1,127 @@
 # Zcode
 
-AI 驱动的软件开发平台。通过流水线（需求→设计→开发→测试）组织软件开发流程，每个环节由 AI Agent 自动执行。
+AI 驱动的个人开发助手。通过流水线（需求→设计→开发→测试）组织软件开发流程，每个环节由 AI Agent 自动执行。
 
 ## 核心功能
 
 - **看板**：流水线视图，任务卡片在需求→设计→开发→测试四列间流转
-- **聊天**：与 AI Agent 对话，包含流水线 Agent 和自定义 Agent
-- **Session**：Agent 自主执行任务，迭代调 LLM + 执行 skills
-- **Discussion**：多 Agent 讨论，两个 Agent 围绕主题多轮对话
-- **Agent 配置**：每个 Agent 独立目录（YAML + prompt + skills），灵活可扩展
+- **聊天**：与 AI Agent 对话
+- **Session**：Agent 自主执行任务，迭代调 LLM + 执行 tools
+- **Discussion**：多 Agent 讨论，围绕主题多轮对话
+- **Agent 配置**：每个 Agent 独立目录（YAML + prompt），灵活可扩展
+- **项目记忆**：项目级 fact 跨 session 持久化，注入 agent prompt
 
 ## 技术栈
 
 | 层 | 技术 |
 |----|------|
-| 前端 | Next.js 16 + React + TypeScript + Tailwind CSS + shadcn/ui |
-| 后端 | Go + Gin + SQLite |
-| Agent Engine | Python + FastAPI + Anthropic SDK / OpenAI SDK |
-| AI | OpenAI API / Anthropic API |
+| 前端 | Next.js + React + TypeScript + Tailwind + shadcn/ui |
+| 服务端 | Hono (standalone HTTP server, port 8000) |
+| Agent Engine | TypeScript（Anthropic SDK） |
+| 数据库 | SQLite + Drizzle ORM |
+| 实时推送 | SSE（Server-Sent Events） |
 
-三层架构：前端 → Go 后端（数据持久化、API网关）→ Agent Engine（LLM调用、Session管理）
+两个独立进程：**Server**（Hono, :8000）+ **Web**（Next.js, :3000）。Agent Engine 内嵌在 Server 进程内。
+
+## 目录设计原则
+
+1. **按职责分目录，不按技术层分** — `apps/`（可部署）、`shared/`（类型）、`agents/`（配置）、`docs/`（文档）、`scripts/`（运维），一眼看懂每个目录是什么
+2. **能平铺就不嵌套** — `shared/` 直接放 `.ts` 文件，不套 `src/`；8 个类型文件不需要再包一层
+3. **能合并就不拆包** — agent-engine 只有 server 用，直接合并进 `apps/server/src/engine/`，不做独立 npm 包
+4. **非代码的不装包** — `shared/` 是纯类型文件，不需要 package.json / tsconfig.json / node_modules，通过 tsconfig paths 引用
+5. **脚本不散落根目录** — `start.sh` / `stop.sh` 收进 `scripts/`，根目录只留配置文件
+6. **根目录一眼看完** — 6 个目录 + 4 个配置文件，没有冗余
 
 ## 项目结构
 
 ```
 zcode/
-├── docs/                   # 文档
-├── agents/                 # Agent 配置（每个子目录一个 Agent）
+├── apps/                        # 可部署应用
+│   ├── web/                     # Next.js 前端 (:3000)
+│   │   └── src/
+│   │       ├── app/             #   页面（kanban, chat, settings）
+│   │       ├── components/      #   UI 组件
+│   │       └── lib/             #   API 调用, SSE, 状态映射
+│   │
+│   └── server/                  # Hono HTTP + Agent Engine (:8000)
+│       └── src/
+│           ├── index.ts         #   入口
+│           ├── app.ts           #   Hono app，路由 + 中间件
+│           ├── db/              #   Drizzle schema + 自动建表
+│           ├── engine/          #   Agent 引擎（Loop, Session, Provider, SkillLoader）
+│           ├── routes/          #   REST + SSE
+│           └── services/        #   业务逻辑
+│
+├── shared/                      # 前后端共享类型（纯文件，无 package.json）
+│   ├── task.ts                  #   Task, TaskStage, Artifact
+│   ├── session.ts               #   Session, SessionType
+│   ├── agent.ts                 #   Agent, AgentConfig
+│   ├── project.ts               #   Project
+│   ├── memory.ts                #   Memory
+│   ├── message.ts               #   Message, ChatRequest
+│   ├── callback.ts              #   CallbackAction
+│   └── index.ts                 #   统一 re-export
+│
+├── agents/                      # Agent 配置（YAML + prompt）
 │   ├── requirement/
-│   │   ├── agent.yaml      # 元数据（name, role, stage, model, max_rounds）
-│   │   ├── system_prompt.md # 系统提示词
-│   │   └── skills/         # Agent 可执行的技能脚本
 │   ├── design/
 │   ├── developer/
 │   └── tester/
-├── backend/                # Go 后端
-│   ├── main.go             # 入口 + 路由
-│   ├── config/             # 环境变量配置
-│   ├── db/                 # SQLite 数据库（4表：tasks, conversations, messages, sessions）
-│   ├── model/              # 数据结构定义
-│   ├── agent/              # LLM Provider（聊天用）
-│   ├── service/            # 业务逻辑
-│   │   ├── task_service.go # 任务 CRUD + 状态机
-│   │   ├── agent_service.go# Agent 配置解析（YAML）
-│   │   ├── chat_service.go # 聊天编排
-│   │   ├── session_service.go  # Session 管理
-│   │   └── agent_bridge.go # Agent Engine HTTP 代理
-│   ├── handler/            # HTTP 处理器
-│   └── packages/harness/   # deer-flow 参考（Python）
-├── agent-engine/           # Python Agent Engine
-│   ├── server.py           # FastAPI 入口
-│   ├── engine/             # 核心引擎
-│   │   ├── agent_loop.py   # Agent 执行循环
-│   │   ├── session.py      # Session 管理
-│   │   ├── discussion.py   # 多 Agent 讨论
-│   │   ├── skill_loader.py # Skill 加载器
-│   │   └── constants.py    # 常量配置
-│   └── providers/          # LLM Provider
-│       ├── base.py         # Provider 基类
-│       ├── registry.py     # Provider 注册表
-│       ├── openai_provider.py
-│       └── anthropic_provider.py
-├── frontend/
-│   └── src/
-│       ├── app/            # 页面路由（/kanban, /chat）
-│       ├── components/     # UI 组件
-│       └── lib/api.ts      # 后端 API 客户端
-├── start.sh                # 一键启动
-├── stop.sh                 # 一键停止
-└── restart.sh              # 一键重启
+│
+├── scripts/                     # 运维脚本
+│   ├── start.sh
+│   ├── stop.sh
+│   └── restart.sh
+│
+├── docs/                        # 文档
+│   ├── plan.md                  #   任务看板（AI 必读）
+│   ├── architecture.md          #   架构设计
+│   ├── api.md                   #   REST API 文档
+│   └── ...
+│
+├── pipeline.yaml                # 流水线阶段配置
+├── package.json                 # monorepo root
+├── pnpm-workspace.yaml          # workspace 定义
+├── tsconfig.base.json           # 共享 TS 配置
+├── .env.example                 # 环境变量模板
+└── CLAUDE.md                    # AI 协作规则
+```
+
+## 进程模型
+
+```
+scripts/start.sh
+  ├── Server (tsx apps/server/src/index.ts)  — :8000
+  │     └── Agent Engine 内嵌（同进程）
+  └── Web (next dev)                         — :3000
+        └── API 请求 → Server :8000
 ```
 
 ## 快速开始
 
 ```bash
-# 配置
-cp .env.example .env  # 编辑填入 API Key
-
-# 一键启动
-./start.sh
+cp .env.example .env     # 编辑填入 ANTHROPIC_API_KEY
+pnpm install             # 安装依赖
+bash scripts/start.sh    # 启动
 ```
 
-三个服务自动启动：
-- Backend: `http://localhost:8000`
-- Agent Engine: `http://localhost:8001`
-- Frontend: `http://localhost:3000`
+浏览器打开 `http://localhost:3000`。
 
-浏览器打开前端地址，自动跳转看板页。
+## 环境变量
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| ANTHROPIC_API_KEY | （空） | Anthropic API 密钥 |
+| DEFAULT_MODEL | claude-sonnet-4-20250514 | 默认 LLM 模型 |
+| DATABASE_PATH | ./zcode.db | SQLite 数据库路径 |
+| AGENTS_DIR | ./agents | Agent 配置目录 |
+| NEXT_PUBLIC_API_URL | http://localhost:8000 | Server API 地址 |
+
+## 常用命令
+
+```bash
+pnpm -r typecheck       # 类型检查
+bash scripts/start.sh   # 启动
+bash scripts/stop.sh    # 停止
+bash scripts/restart.sh # 重启
+```
