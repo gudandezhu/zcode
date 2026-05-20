@@ -23,18 +23,3 @@ export const stageTopColors: Record<string, string> = {
 };
 
 export const PIPELINE_STAGES = ["requirement", "design", "development", "testing"];
-
-export interface ExecutionEvent {
-  type: string;
-  content?: string;
-  agent?: string;
-  name?: string;
-  arguments?: string;
-  question?: string;
-  round?: number;
-  role?: string;
-  participants?: string[];
-  topic?: string;
-  summary?: string;
-  timestamp: number;
-}

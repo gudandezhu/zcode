@@ -4,7 +4,7 @@ import {
   formatToolLabel,
   mergeEventsToSteps,
 } from "./live-stream-logic";
-import type { ExecutionEvent } from "./stages";
+import type { SessionEvent } from "./api";
 
 describe("live-stream-logic", () => {
   describe("getToolIcon", () => {
@@ -60,7 +60,7 @@ describe("live-stream-logic", () => {
 
   describe("mergeEventsToSteps", () => {
     it("with text events creates output step", () => {
-      const events: ExecutionEvent[] = [
+      const events: SessionEvent[] = [
         { type: "text", content: "Hello ", timestamp: 1 },
         { type: "text", content: "world", timestamp: 2 },
       ];
@@ -71,7 +71,7 @@ describe("live-stream-logic", () => {
     });
 
     it("with tool_call + tool_result creates tool step", () => {
-      const events: ExecutionEvent[] = [
+      const events: SessionEvent[] = [
         {
           type: "tool_call",
           name: "read",
@@ -88,7 +88,7 @@ describe("live-stream-logic", () => {
     });
 
     it("with error event creates error step", () => {
-      const events: ExecutionEvent[] = [
+      const events: SessionEvent[] = [
         { type: "error", content: "boom", timestamp: 1 },
       ];
       const { steps } = mergeEventsToSteps(events);
@@ -99,7 +99,7 @@ describe("live-stream-logic", () => {
     });
 
     it("with session_completed creates complete step", () => {
-      const events: ExecutionEvent[] = [
+      const events: SessionEvent[] = [
         { type: "session_completed", timestamp: 1 },
       ];
       const { steps } = mergeEventsToSteps(events);
@@ -109,7 +109,7 @@ describe("live-stream-logic", () => {
     });
 
     it("with clarify_user sets clarifyQuestion", () => {
-      const events: ExecutionEvent[] = [
+      const events: SessionEvent[] = [
         { type: "clarify_user", question: "What?", timestamp: 1 },
       ];
       const { steps, clarifyQuestion } = mergeEventsToSteps(events);
@@ -118,7 +118,7 @@ describe("live-stream-logic", () => {
     });
 
     it("closes text step when non-text event follows", () => {
-      const events: ExecutionEvent[] = [
+      const events: SessionEvent[] = [
         { type: "text", content: "hi", timestamp: 1 },
         { type: "session_completed", timestamp: 2 },
       ];
@@ -130,7 +130,7 @@ describe("live-stream-logic", () => {
 
     it("with tool_result > 120 chars does not set detail", () => {
       const longContent = "x".repeat(130);
-      const events: ExecutionEvent[] = [
+      const events: SessionEvent[] = [
         {
           type: "tool_call",
           name: "read",
@@ -144,7 +144,7 @@ describe("live-stream-logic", () => {
     });
 
     it("with consecutive tool_calls closes previous", () => {
-      const events: ExecutionEvent[] = [
+      const events: SessionEvent[] = [
         {
           type: "tool_call",
           name: "read",
@@ -165,7 +165,7 @@ describe("live-stream-logic", () => {
     });
 
     it("tool_result without prior tool_call is ignored", () => {
-      const events: ExecutionEvent[] = [
+      const events: SessionEvent[] = [
         { type: "tool_result", content: "orphan", timestamp: 1 },
       ];
       const { steps } = mergeEventsToSteps(events);
@@ -173,7 +173,7 @@ describe("live-stream-logic", () => {
     });
 
     it("error without content uses default label", () => {
-      const events: ExecutionEvent[] = [
+      const events: SessionEvent[] = [
         { type: "error", timestamp: 1 },
       ];
       const { steps } = mergeEventsToSteps(events);
@@ -181,7 +181,7 @@ describe("live-stream-logic", () => {
     });
 
     it("tool_result with empty content sets detail to empty string", () => {
-      const events: ExecutionEvent[] = [
+      const events: SessionEvent[] = [
         { type: "tool_call", name: "test", arguments: "{}", timestamp: 1 },
         { type: "tool_result", content: "", timestamp: 2 },
       ];
@@ -190,7 +190,7 @@ describe("live-stream-logic", () => {
     });
 
     it("clarify_user without question does not set clarifyQuestion", () => {
-      const events: ExecutionEvent[] = [
+      const events: SessionEvent[] = [
         { type: "clarify_user", timestamp: 1 },
       ];
       const { clarifyQuestion } = mergeEventsToSteps(events);

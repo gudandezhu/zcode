@@ -6,6 +6,7 @@ import type {
   Memory,
   DiscussionBoard, DiscussionMessage, BoardMessageCreate, ProtocolCreate,
   SessionSummary, Artifact,
+  SessionEvent,
 } from "@zcode/shared";
 
 export type {
@@ -16,29 +17,8 @@ export type {
   Memory,
   DiscussionBoard, DiscussionMessage, BoardMessageCreate, ProtocolCreate,
   SessionSummary, Artifact,
+  SessionEvent,
 };
-
-export interface SSEEvent {
-  type: string;
-  content?: string;
-  agent?: string;
-  name?: string;
-  arguments?: string;
-  question?: string;
-  status?: string;
-  round?: number;
-  role?: string;
-  participants?: string[];
-  topic?: string;
-  summary?: string;
-  taskId?: string;
-  boardId?: string;
-  event?: string;
-  message?: Record<string, unknown>;
-  reaction?: Record<string, unknown>;
-  protocolType?: string;
-  messageId?: string;
-}
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -109,8 +89,8 @@ export const createDiscussion = (taskId: string, initiator: string, participant:
 export const fetchSessionDetail = (sessionId: string): Promise<Session & { messages?: { role: string; content: string; agent?: string }[] }> =>
   api("GET", `/api/sessions/${sessionId}`);
 
-export const fetchSessionEvents = async (sessionId: string): Promise<SSEEvent[]> => {
-  const data = await api<{ events: SSEEvent[] }>("GET", `/api/sessions/${sessionId}/events`);
+export const fetchSessionEvents = async (sessionId: string): Promise<SessionEvent[]> => {
+  const data = await api<{ events: SessionEvent[] }>("GET", `/api/sessions/${sessionId}/events`);
   return data.events || [];
 };
 
@@ -119,7 +99,7 @@ export const sendUserInput = (sessionId: string, message: string): Promise<void>
 
 // SSE streaming
 
-function parseSSE(url: string, onEvent: (e: SSEEvent) => void, onDone: () => void, until?: (e: SSEEvent) => boolean): AbortController {
+function parseSSE(url: string, onEvent: (e: SessionEvent) => void, onDone: () => void, until?: (e: SessionEvent) => boolean): AbortController {
   const ctrl = new AbortController();
   fetch(url, { signal: ctrl.signal })
     .then(async (res) => {
@@ -148,10 +128,10 @@ function parseSSE(url: string, onEvent: (e: SSEEvent) => void, onDone: () => voi
   return ctrl;
 }
 
-export const streamSession = (sessionId: string, onEvent: (e: SSEEvent) => void, onDone: () => void): AbortController =>
+export const streamSession = (sessionId: string, onEvent: (e: SessionEvent) => void, onDone: () => void): AbortController =>
   parseSSE(`${API}/api/sessions/${sessionId}/stream`, onEvent, onDone, (e) => e.type === "done");
 
-export const streamBoard = (boardId: string, onEvent: (e: SSEEvent) => void, onDone: () => void): AbortController =>
+export const streamBoard = (boardId: string, onEvent: (e: SessionEvent) => void, onDone: () => void): AbortController =>
   parseSSE(`${API}/api/boards/${boardId}/stream`, onEvent, onDone);
 
 // Boards

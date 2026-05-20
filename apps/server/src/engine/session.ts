@@ -1,18 +1,10 @@
 import crypto from "crypto";
-import type { Artifact } from "@zcode/shared";
+import type { Artifact, SessionEvent } from "@zcode/shared";
+
+export type { SessionEvent };
 
 const SESSION_TTL = 3600_000; // 1 hour in ms
 const MAX_ITERATIONS = 50;
-
-export interface SessionEvent {
-  type: string;
-  content?: string;
-  agent?: string;
-  name?: string;
-  arguments?: string;
-  question?: string;
-  status?: string;
-}
 
 export class LiveSession {
   id: string;

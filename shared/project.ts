@@ -4,8 +4,6 @@ export interface Project {
   path: string;
   techStack: string[];
   conventions: string;
-  gitInitialized: boolean;
-  gitRemote: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -13,7 +11,6 @@ export interface Project {
 export interface ProjectCreate {
   name: string;
   path?: string;
-  gitRemote?: string;
 }
 
 export interface ProjectUpdate {

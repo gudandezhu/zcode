@@ -7,3 +7,4 @@ export type { Memory, MemoryCreate, MemoryUpdate } from "./memory";
 export type { Message, ChatRequest } from "./message";
 export type { CallbackAction, SessionCallback } from "./callback";
 export type { DiscussionBoard, DiscussionMessage, Reaction, BoardStatus, TriggerType, ProtocolType, ProtocolStatus, ResponsePolicy, BoardMessageCreate, ProtocolCreate } from "./discussion";
+export type { SessionEvent } from "./session-event";

@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
-  type Task, type Session, type SSEEvent,
+  type Task, type Session, type SessionEvent,
   fetchSessions, streamSession, fetchSessionEvents, sendUserInput,
   approveTask, rejectTask, retryTask,
 } from "@/lib/api";
-import type { ExecutionEvent } from "@/lib/stages";
 import { stageLabels, PIPELINE_STAGES } from "@/lib/stages";
 import { mergeEventsToSteps, getToolIcon, type Step } from "@/lib/live-stream-logic";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -138,7 +137,7 @@ function OutputStep({ step }: { step: Step }) {
 
 export function LiveStream({ task, onRefresh }: { task: Task; onRefresh: () => void }) {
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [events, setEvents] = useState<ExecutionEvent[]>([]);
+  const [events, setEvents] = useState<SessionEvent[]>([]);
   const [streaming, setStreaming] = useState(false);
   const [clarifyQuestion, setClarifyQuestion] = useState<string | null>(null);
   const [userInput, setUserInput] = useState("");
@@ -169,8 +168,8 @@ export function LiveStream({ task, onRefresh }: { task: Task; onRefresh: () => v
 
       abortRef.current = streamSession(
         sessionId,
-        (event: SSEEvent) => {
-          const execEvent: ExecutionEvent = {
+        (event: SessionEvent) => {
+          const execEvent: SessionEvent = {
             type: event.type, content: event.content, agent: event.agent,
             name: event.name, arguments: event.arguments, question: event.question,
             round: event.round, role: event.role, participants: event.participants,

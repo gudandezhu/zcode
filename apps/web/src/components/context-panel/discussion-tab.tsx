@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  type Task, type SSEEvent, type DiscussionBoard, type DiscussionMessage,
+  type Task, type SessionEvent, type DiscussionBoard, type DiscussionMessage,
   fetchBoard, fetchBoardMessages, sendBoardMessage, streamBoard,
   createBoardProtocol, updateBoardProtocol,
 } from "@/lib/api";
@@ -144,7 +144,7 @@ export function DiscussionTab({ task }: { task: Task }) {
     abortRef.current?.abort();
     const ctrl = streamBoard(
       board.id,
-      (event: SSEEvent) => {
+      (event: SessionEvent) => {
         if (event.type === "board_message" && event.message) {
           setMessages((prev) => {
             const msg = event.message as unknown as DiscussionMessage;

@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import type { Artifact } from "@zcode/shared";
 import * as svc from "../services/session";
 import * as taskSvc from "../services/task";
 import { getNextStage, getAgentForStage } from "../services/pipeline";
@@ -45,11 +46,11 @@ session.post("/callback", async (c) => {
   if (taskId) {
     const task = await taskSvc.getTask(taskId);
     if (task) {
-      await taskSvc.completeSession(sessionId, taskId, status, artifacts || [], advance);
+      await taskSvc.completeSession(sessionId, taskId, status, (artifacts || []) as Artifact[], advance);
 
       // 3. Handle stage advancement
       const hasStageAdvance = (artifacts || []).some(
-        (a: Record<string, unknown>) => a.type === "stage_advance",
+        (a: { type?: string }) => a.type === "stage_advance",
       );
 
       if ((advance || hasStageAdvance) && status === "completed") {

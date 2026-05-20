@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  type Task, type Session, type SSEEvent,
+  type Task, type Session, type SessionEvent,
   fetchSessions, streamSession, fetchSessionEvents, fetchSessionDetail,
 } from "@/lib/api";
-import type { ExecutionEvent } from "@/lib/stages";
 import { EventBlock, DiscussionBubble } from "./event-blocks";
 import { ArtifactItem } from "./artifact-item";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +16,7 @@ export function TimelineTab({ task }: { task: Task }) {
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [selectedSessionType, setSelectedSessionType] = useState<string>("");
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
-  const [events, setEvents] = useState<ExecutionEvent[]>([]);
+  const [events, setEvents] = useState<SessionEvent[]>([]);
   const [streaming, setStreaming] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const eventsEndRef = useRef<HTMLDivElement>(null);
@@ -50,7 +49,7 @@ export function TimelineTab({ task }: { task: Task }) {
         fetchSessionDetail(sessionId)
           .then((data) => {
             const msgs = data.messages || [];
-            const loaded: ExecutionEvent[] = msgs.map((m: { role: string; content: string; agent?: string }, i: number) => {
+            const loaded: SessionEvent[] = msgs.map((m: { role: string; content: string; agent?: string }, i: number) => {
               const isInitiator = m.agent === participants?.[0];
               return { type: "discussion_text", content: m.content, agent: m.agent || data.agentName, role: isInitiator ? "initiator" : "participant", timestamp: Date.now() - (msgs.length - i) * 1000 };
             });
@@ -73,8 +72,8 @@ export function TimelineTab({ task }: { task: Task }) {
     setStreaming(true);
     abortRef.current = streamSession(
       sessionId,
-      (event: SSEEvent) => {
-        const execEvent: ExecutionEvent = {
+      (event: SessionEvent) => {
+        const execEvent: SessionEvent = {
           type: event.type, content: event.content, agent: event.agent,
           name: event.name, arguments: event.arguments, question: event.question,
           round: event.round, role: event.role, participants: event.participants,

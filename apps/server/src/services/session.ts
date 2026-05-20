@@ -1,7 +1,7 @@
 import { eq, and, desc } from "drizzle-orm";
 import { getDb } from "../db";
 import { sessions } from "../db/schema";
-import type { Session } from "@zcode/shared";
+import type { Session, Artifact } from "@zcode/shared";
 import crypto from "crypto";
 
 function genId(): string {
@@ -10,24 +10,6 @@ function genId(): string {
 
 function now(): string {
   return new Date().toISOString();
-}
-
-function mapRow(row: Record<string, unknown>): Session {
-  return {
-    id: row.id as string,
-    type: (row.type as string) as Session["type"],
-    agentName: (row.agentName as string) || "",
-    taskId: (row.taskId as string) || "",
-    participants: JSON.parse((row.participants as string) || "[]"),
-    status: (row.status as string) as Session["status"],
-    parentSessionId: (row.parentSessionId as string) || "",
-    maxRounds: (row.maxRounds as number) || 50,
-    currentRound: (row.currentRound as number) || 0,
-    currentSpeaker: (row.currentSpeaker as string) || "",
-    artifacts: JSON.parse((row.artifacts as string) || "[]"),
-    createdAt: (row.createdAt as string) || "",
-    updatedAt: (row.updatedAt as string) || "",
-  };
 }
 
 export async function createSession(input: {
@@ -39,7 +21,7 @@ export async function createSession(input: {
   participants?: string[];
   maxRounds?: number;
   parentSessionId?: string;
-  artifacts?: Record<string, unknown>[];
+  artifacts?: Artifact[];
   boardId?: string;
   triggerMessageId?: string;
 }): Promise<Session> {
@@ -51,13 +33,13 @@ export async function createSession(input: {
     type: input.type || "main",
     agentName: input.agentName,
     taskId: input.taskId,
-    participants: JSON.stringify(input.participants || []),
+    participants: input.participants || [],
     status: input.status || "running",
     parentSessionId: input.parentSessionId || "",
     maxRounds: input.maxRounds || 50,
     currentRound: 0,
     currentSpeaker: "",
-    artifacts: JSON.stringify(input.artifacts || []),
+    artifacts: input.artifacts || [],
     boardId: input.boardId || "",
     triggerMessageId: input.triggerMessageId || "",
     createdAt: t,
@@ -66,7 +48,7 @@ export async function createSession(input: {
     target: sessions.id,
     set: {
       status: input.status || "running",
-      artifacts: JSON.stringify(input.artifacts || []),
+      artifacts: input.artifacts || [],
       updatedAt: t,
     },
   });
@@ -78,7 +60,7 @@ export async function createSession(input: {
     parentSessionId: input.parentSessionId || "",
     maxRounds: input.maxRounds || 50, currentRound: 0,
     currentSpeaker: "",
-    artifacts: (input.artifacts || []) as unknown as Session["artifacts"],
+    artifacts: input.artifacts || [],
     createdAt: t, updatedAt: t,
   };
 }
@@ -87,7 +69,7 @@ export async function getSession(id: string): Promise<Session | null> {
   const db = getDb();
   const rows = await db.select().from(sessions).where(eq(sessions.id, id));
   if (rows.length === 0) return null;
-  return mapRow(rows[0]);
+  return rows[0] as unknown as Session;
 }
 
 export async function updateSessionStatus(id: string, status: string): Promise<void> {
@@ -100,7 +82,7 @@ export async function listSessionsByTask(taskId: string): Promise<Session[]> {
   const rows = await db.select().from(sessions)
     .where(eq(sessions.taskId, taskId))
     .orderBy(sessions.createdAt);
-  return rows.map(mapRow);
+  return rows as unknown as Session[];
 }
 
 export async function getMainSessionForTask(taskId: string): Promise<Session | null> {
@@ -110,5 +92,5 @@ export async function getMainSessionForTask(taskId: string): Promise<Session | n
     .orderBy(desc(sessions.createdAt))
     .limit(1);
   if (rows.length === 0) return null;
-  return mapRow(rows[0]);
+  return rows[0] as unknown as Session;
 }

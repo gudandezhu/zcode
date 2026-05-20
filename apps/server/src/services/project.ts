@@ -12,20 +12,6 @@ function now(): string {
   return new Date().toISOString();
 }
 
-function mapRow(row: Record<string, unknown>): Project {
-  return {
-    id: row.id as string,
-    name: row.name as string,
-    path: row.path as string,
-    techStack: JSON.parse((row.techStack as string) || "[]"),
-    conventions: row.conventions as string,
-    gitInitialized: false,
-    gitRemote: "",
-    createdAt: (row.createdAt as string) || "",
-    updatedAt: (row.updatedAt as string) || "",
-  };
-}
-
 export async function createProject(input: {
   name: string;
   path?: string;
@@ -44,7 +30,6 @@ export async function createProject(input: {
   return {
     id, name: input.name, path: input.path ?? "",
     techStack: [], conventions: "",
-    gitInitialized: false, gitRemote: input.gitRemote ?? "",
     createdAt: t, updatedAt: t,
   };
 }
@@ -52,14 +37,14 @@ export async function createProject(input: {
 export async function listProjects(): Promise<Project[]> {
   const db = getDb();
   const rows = await db.select().from(projects).orderBy(desc(projects.updatedAt));
-  return rows.map(mapRow);
+  return rows as Project[];
 }
 
 export async function getProject(id: string): Promise<Project | null> {
   const db = getDb();
   const rows = await db.select().from(projects).where(eq(projects.id, id));
   if (rows.length === 0) return null;
-  return mapRow(rows[0]);
+  return rows[0] as Project;
 }
 
 export async function updateProject(
@@ -76,7 +61,7 @@ export async function updateProject(
   await db.update(projects).set({
     name: input.name ?? existing.name,
     path: input.path ?? existing.path,
-    techStack: JSON.stringify(techStack),
+    techStack,
     conventions: input.conventions ?? existing.conventions,
     updatedAt: t,
   }).where(eq(projects.id, id));

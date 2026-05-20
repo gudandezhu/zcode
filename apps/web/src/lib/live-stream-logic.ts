@@ -1,4 +1,4 @@
-import type { ExecutionEvent } from "@/lib/stages";
+import type { SessionEvent } from "@/lib/api";
 
 export type StepStatus = "active" | "done" | "error";
 export type StepType = "thinking" | "tool" | "output" | "error" | "complete";
@@ -36,7 +36,7 @@ export function formatToolLabel(name: string, argsStr?: string): string {
   return name;
 }
 
-export function mergeEventsToSteps(events: ExecutionEvent[]): {
+export function mergeEventsToSteps(events: SessionEvent[]): {
   steps: Step[];
   clarifyQuestion: string | null;
 } {

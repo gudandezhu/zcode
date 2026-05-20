@@ -1,7 +1,7 @@
+import type { Artifact } from "@zcode/shared";
 import { LiveSession, sessionManager } from "./session";
 import { SkillLoader } from "./skill-loader";
 import { getProvider, type LLMProvider } from "./provider";
-import type { Artifact } from "@zcode/shared";
 import * as discussionSvc from "../services/discussion";
 
 const MAX_ITERATIONS = 50;

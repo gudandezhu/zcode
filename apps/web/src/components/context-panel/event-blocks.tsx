@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import type { ExecutionEvent } from "@/lib/stages";
+import type { SessionEvent } from "@/lib/api";
 
-export function DiscussionBubble({ event, participants }: { event: ExecutionEvent; participants: string[] }) {
+export function DiscussionBubble({ event, participants }: { event: SessionEvent; participants: string[] }) {
   if (event.type === "discussion_started") {
     return (
       <div className="text-xs bg-secondary rounded-md px-3 py-2 text-center">
@@ -52,7 +52,7 @@ export function DiscussionBubble({ event, participants }: { event: ExecutionEven
   return <EventBlock event={event} />;
 }
 
-export function EventBlock({ event }: { event: ExecutionEvent }) {
+export function EventBlock({ event }: { event: SessionEvent }) {
   if (event.type === "thinking") {
     return <ThinkingBlock content={event.content || ""} />;
   }

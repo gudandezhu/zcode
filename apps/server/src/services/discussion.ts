@@ -1,16 +1,10 @@
 import { eq, desc } from "drizzle-orm";
 import { getDb } from "../db";
 import { discussionBoards, discussionMessages } from "../db/schema";
+import type { DiscussionBoard, DiscussionMessage, Reaction, BoardMessageCreate, ProtocolCreate } from "@zcode/shared";
 import { eventHub } from "./events";
 import * as sessionSvc from "./session";
 import { SkillLoader } from "../engine/skill-loader";
-import type {
-  DiscussionBoard,
-  DiscussionMessage,
-  BoardMessageCreate,
-  ProtocolCreate,
-  Reaction,
-} from "@zcode/shared";
 import crypto from "crypto";
 
 function genId(): string {
@@ -21,35 +15,6 @@ function now(): string {
   return new Date().toISOString();
 }
 
-function mapBoard(row: Record<string, unknown>): DiscussionBoard {
-  return {
-    id: row.id as string,
-    taskId: (row.taskId as string) || "",
-    participants: JSON.parse((row.participants as string) || "[]"),
-    status: (row.status as string) as DiscussionBoard["status"],
-    createdAt: (row.createdAt as string) || "",
-    updatedAt: (row.updatedAt as string) || "",
-  };
-}
-
-function mapMessage(row: Record<string, unknown>): DiscussionMessage {
-  return {
-    id: row.id as string,
-    boardId: (row.boardId as string) || "",
-    speaker: row.speaker as string,
-    content: row.content as string,
-    triggerType: (row.triggerType as string) as DiscussionMessage["triggerType"],
-    mentions: JSON.parse((row.mentions as string) || "[]"),
-    topics: JSON.parse((row.topics as string) || "[]"),
-    protocolType: (row.protocolType ?? null) as DiscussionMessage["protocolType"],
-    protocolStatus: (row.protocolStatus ?? null) as DiscussionMessage["protocolStatus"],
-    responsePolicy: (row.responsePolicy ?? null) as DiscussionMessage["responsePolicy"],
-    reactions: JSON.parse((row.reactions as string) || "[]"),
-    parentId: (row.parentId as string) || "",
-    createdAt: (row.createdAt as string) || "",
-  };
-}
-
 export async function getOrCreateBoard(taskId: string): Promise<DiscussionBoard> {
   const db = getDb();
   const rows = await db
@@ -57,14 +22,14 @@ export async function getOrCreateBoard(taskId: string): Promise<DiscussionBoard>
     .from(discussionBoards)
     .where(eq(discussionBoards.taskId, taskId));
 
-  if (rows.length > 0) return mapBoard(rows[0]);
+  if (rows.length > 0) return rows[0] as DiscussionBoard;
 
   const id = genId();
   const t = now();
   await db.insert(discussionBoards).values({
     id,
     taskId,
-    participants: "[]",
+    participants: [],
     status: "active",
     createdAt: t,
     updatedAt: t,
@@ -85,7 +50,7 @@ export async function getBoardByTask(taskId: string): Promise<DiscussionBoard | 
     .select()
     .from(discussionBoards)
     .where(eq(discussionBoards.taskId, taskId));
-  return rows.length > 0 ? mapBoard(rows[0]) : null;
+  return rows.length > 0 ? (rows[0] as DiscussionBoard) : null;
 }
 
 export async function addParticipant(boardId: string, agentName: string): Promise<DiscussionBoard | null> {
@@ -96,14 +61,14 @@ export async function addParticipant(boardId: string, agentName: string): Promis
     .where(eq(discussionBoards.id, boardId));
   if (rows.length === 0) return null;
 
-  const board = mapBoard(rows[0]);
+  const board = rows[0] as unknown as DiscussionBoard;
   if (board.participants.includes(agentName)) return board;
 
   const updated = [...board.participants, agentName];
   const t = now();
   await db
     .update(discussionBoards)
-    .set({ participants: JSON.stringify(updated), updatedAt: t })
+    .set({ participants: updated, updatedAt: t })
     .where(eq(discussionBoards.id, boardId));
 
   return { ...board, participants: updated, updatedAt: t };
@@ -122,7 +87,7 @@ export async function listMessages(
     .orderBy(desc(discussionMessages.createdAt))
     .limit(limit)
     .offset(offset);
-  return rows.map(mapMessage).reverse();
+  return (rows as DiscussionMessage[]).reverse();
 }
 
 export async function createMessage(
@@ -139,11 +104,11 @@ export async function createMessage(
     speaker: input.speaker,
     content: input.content,
     triggerType: input.triggerType ?? "mention",
-    mentions: JSON.stringify(input.mentions ?? []),
-    topics: JSON.stringify(input.topics ?? []),
+    mentions: input.mentions ?? [],
+    topics: input.topics ?? [],
     protocolType: input.protocolType ?? null,
     responsePolicy: input.responsePolicy ?? null,
-    reactions: "[]",
+    reactions: [],
     parentId: input.parentId ?? "",
     createdAt: t,
   });
@@ -196,11 +161,11 @@ export async function addReaction(
     .where(eq(discussionMessages.id, messageId));
   if (rows.length === 0) return null;
 
-  const msg = mapMessage(rows[0]);
+  const msg = rows[0] as unknown as DiscussionMessage;
   const reactions = [...msg.reactions, reaction];
   await db
     .update(discussionMessages)
-    .set({ reactions: JSON.stringify(reactions) })
+    .set({ reactions })
     .where(eq(discussionMessages.id, messageId));
 
   const updated = { ...msg, reactions };
@@ -254,7 +219,7 @@ export async function updateProtocolStatus(
     .set({ protocolStatus: status })
     .where(eq(discussionMessages.id, messageId));
 
-  const msg = mapMessage(rows[0]);
+  const msg = rows[0] as unknown as DiscussionMessage;
   const taskId = await lookupTaskId(msg.boardId);
   publishBoardEvent(msg.boardId, taskId, "board_protocol_update", `协议状态变更为 ${status}`, {
     messageId,
@@ -284,7 +249,7 @@ function publishBoardEvent(
 async function lookupTaskId(boardId: string): Promise<string> {
   const db = getDb();
   const rows = await db.select().from(discussionBoards).where(eq(discussionBoards.id, boardId));
-  return rows.length > 0 ? mapBoard(rows[0]).taskId : "";
+  return rows.length > 0 ? (rows[0] as DiscussionBoard).taskId : "";
 }
 
 export async function triggerMentionSessions(

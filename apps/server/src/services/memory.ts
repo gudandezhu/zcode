@@ -12,16 +12,6 @@ function now(): string {
   return new Date().toISOString();
 }
 
-function mapRow(row: Record<string, unknown>): Memory {
-  return {
-    id: row.id as string,
-    projectId: (row.projectId as string) || "",
-    fact: row.fact as string,
-    createdAt: (row.createdAt as string) || "",
-    updatedAt: (row.updatedAt as string) || "",
-  };
-}
-
 export async function createMemory(
   projectId: string,
   input: { fact: string },
@@ -44,7 +34,7 @@ export async function listMemories(projectId: string): Promise<Memory[]> {
   const rows = await db.select().from(projectMemories)
     .where(eq(projectMemories.projectId, projectId))
     .orderBy(projectMemories.updatedAt);
-  return rows.map(mapRow);
+  return rows as Memory[];
 }
 
 export async function updateMemory(
@@ -59,7 +49,7 @@ export async function updateMemory(
   }).where(eq(projectMemories.id, id));
   const rows = await db.select().from(projectMemories).where(eq(projectMemories.id, id));
   if (rows.length === 0) return null;
-  return mapRow(rows[0]);
+  return rows[0] as Memory;
 }
 
 export async function deleteMemory(id: string): Promise<boolean> {

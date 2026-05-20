@@ -10,21 +10,17 @@ describe("project service", () => {
     expect(p.path).toBe("");
     expect(p.techStack).toEqual([]);
     expect(p.conventions).toBe("");
-    expect(p.gitInitialized).toBe(false);
-    expect(p.gitRemote).toBe("");
     expect(p.createdAt).toBeTruthy();
     expect(p.updatedAt).toBeTruthy();
   });
 
-  it("createProject with path and gitRemote", async () => {
+  it("createProject with path", async () => {
     const p = await projectSvc.createProject({
       name: "MyApp",
       path: "/home/user/myapp",
-      gitRemote: "https://github.com/user/myapp",
     });
 
     expect(p.path).toBe("/home/user/myapp");
-    expect(p.gitRemote).toBe("https://github.com/user/myapp");
   });
 
   it("getProject returns created project", async () => {
@@ -102,7 +98,6 @@ describe("project service", () => {
     });
 
     const fetched = await projectSvc.getProject(created.id);
-    // gitRemote is not stored in DB, only returned from createProject
     expect(fetched).toMatchObject({
       id: created.id,
       name: "RoundTrip",
