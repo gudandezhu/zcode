@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "paths": {
+      "@zcode/shared": ["../../shared"]
+    }
+  },
+  "include": ["src", "../../shared"]
+}

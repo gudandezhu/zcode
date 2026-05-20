@@ -1,0 +1,37 @@
+stages:
+  - key: requirement
+    agent: requirement
+    next: design
+    allowed_actions: [advance, discuss, clarify, stop]
+    gate:
+      type: human_review
+      max_retries: 3
+  - key: design
+    agent: design
+    next: development
+    allowed_actions: [advance, discuss, clarify, stop]
+    gate:
+      type: human_review
+      max_retries: 3
+  - key: development
+    agent: developer
+    next: testing
+    allowed_actions: [advance, discuss, clarify, stop]
+    gate:
+      type: auto_check
+      checks:
+        - name: lint
+          command: "echo 'lint check placeholder'"
+        - name: build
+          command: "echo 'build check placeholder'"
+  - key: testing
+    agent: tester
+    next: done
+    allowed_actions: [advance, discuss, clarify, stop]
+    gate:
+      type: auto_check
+      checks:
+        - name: test
+          command: "echo 'test check placeholder'"
+  - key: done
+    allowed_actions: []

@@ -1,0 +1,17 @@
+{
+  "name": "zcode",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @zcode/web dev",
+    "start": "bash scripts/start.sh",
+    "stop": "bash scripts/stop.sh",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:coverage": "pnpm -r test:coverage"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

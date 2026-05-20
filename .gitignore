@@ -7,10 +7,13 @@
 
 .env
 
-frontend/node_modules
-frontend/.next
+node_modules
+.next
+dist
+*.tsbuildinfo
 
-backend/zcode-server
+__pycache__/
+*.pyc
 
 .DS_Store
 .idea
